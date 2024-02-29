@@ -8,6 +8,7 @@ import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Responsive from '@amcharts/amcharts5/themes/Responsive';
 import '../App.css';
 import {
+  buildingFilterExpression,
   buildingType,
   generateChartData,
   generateTotalProgress,
@@ -30,7 +31,6 @@ const Chart = (props: any) => {
   const chartRef = useRef<unknown | any | undefined>({});
   const [chartData, setChartData] = useState([]);
   const [progress, setProgress] = useState([]);
-  const [buildingName, setBuildingName] = useState<any>();
 
   const chartID = 'station-bar';
   useEffect(() => {
@@ -42,7 +42,7 @@ const Chart = (props: any) => {
       setProgress(response);
     });
 
-    setBuildingName(props.building);
+    buildingFilterExpression(props.building);
 
     zoomToLayer(buildingSpotLayer);
   }, [props.building]);
@@ -244,34 +244,29 @@ const Chart = (props: any) => {
         const status_selected: number | null =
           fieldName === 'comp' ? (fieldName === 'incomp' ? 1 : 4) : fieldName === 'delay' ? 3 : 1;
 
-        buildingFilter.filterBlocks = [
-          {
-            filterExpression:
-              "Name = '" +
-              props.building +
-              "'" +
-              ' AND ' +
-              'type = ' +
-              type_selected +
-              ' AND ' +
-              'status = ' +
-              status_selected,
-          },
-        ];
+        // buildingFilter.filterBlocks = [
+        //   {
+        //     filterExpression:
+        //       "Name = '" +
+        //       props.building +
+        //       "'" +
+        //       ' AND ' +
+        //       'type = ' +
+        //       type_selected +
+        //       ' AND ' +
+        //       'status = ' +
+        //       status_selected,
+        //   },
+        // ];
 
-        buildingLayer.filters = [buildingFilter];
-        buildingLayer.activeFilterId = buildingFilter.id;
-
-        view.on('click', () => {
-          buildingFilter.filterBlocks = [
-            {
-              filterExpression: "Name = '" + props.building + "'",
-            },
-          ];
-          buildingLayer.filters = [buildingFilter];
-          buildingLayer.activeFilterId = buildingFilter.id;
-        });
+        // buildingLayer.filters = [buildingFilter];
+        // buildingLayer.activeFilterId = buildingFilter.id;
+        // view.on('click', () => {
+        //   console.log(props.building);
+        //   buildingFilterExpression(props.building);
+        // });
       });
+
       legend.data.push(series);
     }
     makeSeries('Complete', 'comp');

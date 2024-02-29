@@ -1,6 +1,17 @@
 import { view } from './Scene';
-import { dateTable, depotChart } from './layers';
+import { buildingFilter, buildingLayer, dateTable, depotChart } from './layers';
 import StatisticDefinition from '@arcgis/core/rest/support/StatisticDefinition';
+
+// bulding filter
+export async function buildingFilterExpression(buildingname: any) {
+  buildingFilter.filterBlocks = [
+    {
+      filterExpression: "Name = '" + buildingname + "'",
+    },
+  ];
+  buildingLayer.filters = [buildingFilter];
+  buildingLayer.activeFilterId = buildingFilter.id;
+}
 
 // Updat date
 export async function dateUpdate() {

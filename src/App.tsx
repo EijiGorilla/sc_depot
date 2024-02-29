@@ -24,11 +24,10 @@ import {
 } from '@esri/calcite-components-react';
 import Chart from './components/Chart';
 import { DropDownData } from './customClass';
-import { buildingFilter, buildingLayer, buildingSpotLayer, depotChart } from './layers';
+import { buildingSpotLayer, depotChart } from './layers';
 import { webscene } from './layers';
-import { dateUpdate } from './Query';
-import BuildingExplorer from '@arcgis/core/widgets/BuildingExplorer';
-import Expand from '@arcgis/core/widgets/Expand';
+import { buildingFilterExpression, dateUpdate } from './Query';
+
 function App() {
   const [asOfDate, setAsOfDate] = useState<undefined | any | unknown>(null);
 
@@ -71,20 +70,6 @@ function App() {
   useEffect(() => {
     if (nextWidget === 'timeslider') {
       view.ui.remove(timeSlider);
-    }
-
-    // Filter buildings
-    if (buildingName != null) {
-      buildingFilter.filterBlocks = [
-        {
-          // an SQL expression that filters using the BldgLevel field
-          filterExpression: "Name = '" + buildingName.field1 + "'",
-        },
-      ];
-      // set the filter in the filters array on the layer
-      buildingLayer.filters = [buildingFilter];
-      // specify which filter is the one that should be applied
-      buildingLayer.activeFilterId = buildingFilter.id;
     }
   }, [buildingName]);
 
@@ -152,12 +137,13 @@ function App() {
     <>
       <CalciteShell>
         <CalciteTabs slot="panel-end" style={{ width: '25vw' }}>
+          <Chart building={!buildingName ? '' : buildingName.field1} />
           {/* Make sure that the component 'Chart' is executed after sub-layers are loaded.  */}
-          {!depotChart ? (
+          {/* {!depotChart ? (
             <div></div>
           ) : (
             <Chart building={!buildingName ? '' : buildingName.field1} />
-          )}
+          )} */}
         </CalciteTabs>
         <header
           slot="header"
