@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-comment-textnodes */
 import { useRef, useEffect, useState } from 'react';
-import { map, view, basemaps, layerList, timeSlider, start } from './Scene';
+import { view, basemaps, layerList, timeSlider, start } from './Scene';
 import Select from 'react-select';
 import './index.css';
 import './App.css';
@@ -24,18 +24,11 @@ import {
 } from '@esri/calcite-components-react';
 import Chart from './components/Chart';
 import { DropDownData } from './customClass';
-import {
-  floorsLayer,
-  stColumnLayer,
-  stFoundationLayer,
-  stFramingLayer,
-  wallsLayer,
-  columnsLayer,
-  buildingSpotLayer,
-} from './layers';
-// import TimeSlider from './components/TimeSlider';
+import { buildingFilter, buildingLayer, buildingSpotLayer, depotChart } from './layers';
+import { webscene } from './layers';
 import { dateUpdate } from './Query';
-
+import BuildingExplorer from '@arcgis/core/widgets/BuildingExplorer';
+import Expand from '@arcgis/core/widgets/Expand';
 function App() {
   const [asOfDate, setAsOfDate] = useState<undefined | any | unknown>(null);
 
@@ -51,9 +44,8 @@ function App() {
   const [underground, setUnderground] = useState<boolean>(false);
 
   // For dropdown filter
-  const [stationName, setStationName] = useState<null | any>(null);
+  const [buildingName, setBuildingName] = useState<null | any>(null);
   const [initBuildingNames, setInitBuildingNames] = useState([]);
-  const defaultBuilding = 'CPS';
 
   useEffect(() => {
     if (activeWidget) {
@@ -61,19 +53,6 @@ function App() {
         `[data-panel-id=${activeWidget}]`,
       ) as HTMLCalcitePanelElement;
       actionActiveWidget.hidden = true;
-    }
-
-    if (activeWidget === 'timeslider') {
-      timeSlider.timeExtent.end = start;
-      view.ui.remove(timeSlider);
-      const queryExpression = 'Station = ' + stationName.value;
-
-      stColumnLayer.definitionExpression = queryExpression;
-      stFoundationLayer.definitionExpression = queryExpression;
-      stFramingLayer.definitionExpression = queryExpression;
-      columnsLayer.definitionExpression = queryExpression;
-      floorsLayer.definitionExpression = queryExpression;
-      wallsLayer.definitionExpression = queryExpression;
     }
 
     if (nextWidget !== activeWidget) {
@@ -93,14 +72,28 @@ function App() {
     if (nextWidget === 'timeslider') {
       view.ui.remove(timeSlider);
     }
-  }, [stationName]);
+
+    // Filter buildings
+    if (buildingName != null) {
+      buildingFilter.filterBlocks = [
+        {
+          // an SQL expression that filters using the BldgLevel field
+          filterExpression: "Name = '" + buildingName.field1 + "'",
+        },
+      ];
+      // set the filter in the filters array on the layer
+      buildingLayer.filters = [buildingFilter];
+      // specify which filter is the one that should be applied
+      buildingLayer.activeFilterId = buildingFilter.id;
+    }
+  }, [buildingName]);
 
   const handleMunicipalityChange = (obj: any) => {
-    setStationName(obj);
+    setBuildingName(obj);
   };
 
   useEffect(() => {
-    map.ground.opacity = underground === true ? 0.7 : 1;
+    webscene.ground.opacity = underground === true ? 0.7 : 1;
     view.environment.atmosphereEnabled = false;
   }, [underground]);
 
@@ -121,7 +114,7 @@ function App() {
     });
 
     if (mapDiv.current) {
-      map.ground.navigationConstraint = {
+      webscene.ground.navigationConstraint = {
         type: 'none',
       };
 
@@ -160,10 +153,10 @@ function App() {
       <CalciteShell>
         <CalciteTabs slot="panel-end" style={{ width: '25vw' }}>
           {/* Make sure that the component 'Chart' is executed after sub-layers are loaded.  */}
-          {!stColumnLayer ? (
+          {!depotChart ? (
             <div></div>
           ) : (
-            <Chart station={!stationName ? '' : stationName.field1} />
+            <Chart building={!buildingName ? '' : buildingName.field1} />
           )}
         </CalciteTabs>
         <header
@@ -186,7 +179,7 @@ function App() {
               <b style={{ color: 'white', margin: 10, fontSize: '0.9vw' }}></b>
               <Select
                 placeholder="Select Station"
-                value={stationName}
+                value={buildingName}
                 options={initBuildingNames}
                 onChange={handleMunicipalityChange}
                 getOptionLabel={(x: any) => x.field1}
@@ -240,7 +233,7 @@ function App() {
               }}
             ></CalciteAction>
 
-            <CalciteAction
+            {/* <CalciteAction
               data-action-id="timeslider"
               icon="clock"
               text="Timeslider"
@@ -249,7 +242,7 @@ function App() {
                 setNextWidget(event.target.id);
                 setActiveWidget(nextWidget === activeWidget ? null : nextWidget);
               }}
-            ></CalciteAction>
+            ></CalciteAction> */}
 
             <CalciteAction
               data-action-id="information"
@@ -298,12 +291,12 @@ function App() {
             </CalciteList>
           </CalcitePanel>
 
-          <CalcitePanel
+          {/* <CalcitePanel
             class="timeslider-panel"
             height-scale="s"
             data-panel-id="timeslider"
             hidden
-          ></CalcitePanel>
+          ></CalcitePanel> */}
 
           <CalcitePanel heading="Description" data-panel-id="information" hidden>
             {nextWidget === 'information' ? (
@@ -354,7 +347,7 @@ function App() {
 
         {/* time slider widget */}
         {/* {nextWidget === 'timeslider' && nextWidget !== activeWidget ? (
-          <TimeSlider station={!stationName ? '' : stationName.name} />
+          <TimeSlider station={!buildingName ? '' : buildingName.name} />
         ) : (
           ''
         )} */}

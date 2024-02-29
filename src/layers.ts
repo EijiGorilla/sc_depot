@@ -8,6 +8,9 @@ import {
   SimpleLineSymbol,
 } from '@arcgis/core/symbols';
 import { labelSymbol3DLine } from './Label';
+import WebScene from '@arcgis/core/WebScene';
+import BuildingFilter from '@arcgis/core/layers/support/BuildingFilter';
+import Collection from '@arcgis/core/core/Collection';
 import BuildingSceneLayer from '@arcgis/core/layers/BuildingSceneLayer';
 
 /* Standalone table for Dates */
@@ -75,6 +78,29 @@ export const stationLayer = new FeatureLayer({
 stationLayer.listMode = 'hide';
 
 /* Building Scene Layer for station structures */
+const buildingSpotLabel = labelSymbol3DLine({
+  materialColor: '#d4ff33',
+  fontSize: 15,
+  fontFamily: 'Ubuntu Mono',
+  fontWeight: 'normal',
+  haloColor: 'black',
+  haloSize: 0.5,
+  vOffsetScreenLength: 100,
+  vOffsetMaxWorldLength: 700,
+  vOffsetMinWorldLength: 80,
+  calloutColor: 'gray',
+  calloutSize: 0.3,
+});
+
+var labelClassBulding = new LabelClass({
+  symbol: buildingSpotLabel,
+  labelPlacement: 'above-center',
+  labelExpressionInfo: {
+    expression: 'DefaultValue($feature.Name, "no data")',
+    //value: "{TEXTSTRING}"
+  },
+});
+
 export const buildingSpotLayer = new FeatureLayer({
   portalItem: {
     id: '285e68f3fcce48f6ab196f912c5c58c5',
@@ -84,147 +110,42 @@ export const buildingSpotLayer = new FeatureLayer({
   },
   popupEnabled: false,
   outFields: ['*'],
+  labelingInfo: [labelClassBulding],
 });
 buildingSpotLayer.listMode = 'hide';
 
-export const buildingLayer = new BuildingSceneLayer({
+export const webscene = new WebScene({
+  basemap: 'dark-gray-vector', // "streets-night-vector", basemap
+  ground: 'world-elevation',
+});
+webscene.add(buildingSpotLayer);
+
+export const buildingLayer: any = new BuildingSceneLayer({
   portalItem: {
     id: '2fcb3db0ec324f92805cc45c0e79f29d',
     portal: {
       url: 'https://gis.railway-sector.com/portal',
     },
   },
-  outFields: ['*'],
   title: 'Depot Buildings',
 });
 
-// Discipline: Architectural
-export let columnsLayer: null | any;
-export let floorsLayer: null | any;
-export let wallsLayer: null | any;
-export let doorsLayer: null | any;
-export let roofsLayer: null | any;
-export let furnitureLayer: null | any;
-export let stairsLayer: null | any;
-export let windowsLayer: null | any;
+webscene.add(buildingLayer);
 
-// Discipline: Structural
-export let stFramingLayer: null | any;
-export let stColumnLayer: null | any;
-export let stFoundationLayer: null | any;
-
-let genericModelLayer: null | any;
-let excludedLayers: any = [];
-let ArchitecturalLayers: null | any;
-
-export const popuTemplate = {
-  title: '{Name}',
-  content: [
-    {
-      type: 'fields',
-      fieldInfos: [
-        // {
-        //   fieldName: 'target_date',
-        //   label: 'Target Date',
-        // },
-        {
-          fieldName: 'Category',
-          label: 'Category',
-        },
-        {
-          fieldName: 'Status',
-          label: 'Construction Status',
-        },
-        {
-          fieldName: 'BldgLevel',
-          label: 'Building Level',
-        },
-        {
-          fieldName: 'StructureLevel',
-          label: 'Structure Level',
-        },
-        // {
-        //   fieldName: 'P6ID',
-        //   label: 'P6 ID',
-        // },
-      ],
+/*  Depot Building table for chart  */
+export const depotChart = new FeatureLayer({
+  portalItem: {
+    id: 'ab5ddbc7bd034e8ba332e38d5a7088a2',
+    portal: {
+      url: 'https://gis.railway-sector.com/portal',
     },
-  ],
-};
-
-buildingLayer.when(() => {
-  buildingLayer.allSublayers.forEach((layer: any) => {
-    switch (layer.modelName) {
-      case 'FullModel':
-        layer.visible = true;
-        break;
-
-      case 'Architectural':
-        layer.visible = false;
-        break;
-
-      case 'GenericModel':
-        genericModelLayer = layer;
-        excludedLayers.push(layer);
-        break;
-
-      case 'Furniture':
-        furnitureLayer = layer;
-        break;
-
-      case 'Doors':
-        doorsLayer = layer;
-        break;
-
-      case 'Columns':
-        columnsLayer = layer;
-        columnsLayer.popupTemplate = popuTemplate;
-        //excludedLayers.push(layer);
-        break;
-
-      case 'Floors':
-        floorsLayer = layer;
-        floorsLayer.popupTemplate = popuTemplate;
-        //excludedLayers
-        break;
-
-      case 'Stairs':
-        stairsLayer = layer;
-        stairsLayer.popupTemplate = popuTemplate;
-        break;
-
-      case 'Roofs':
-        roofsLayer = layer;
-        roofsLayer.popupTemplate = popuTemplate;
-        break;
-
-      case 'Walls':
-        wallsLayer = layer;
-        wallsLayer.popupTemplate = popuTemplate;
-        break;
-
-      case 'Windows':
-        windowsLayer = layer;
-        windowsLayer.popupTemplate = popuTemplate;
-        break;
-
-      case 'StructuralFraming':
-        stFramingLayer = layer;
-        stFramingLayer.popupTemplate = popuTemplate;
-        break;
-
-      case 'StructuralColumns':
-        stColumnLayer = layer;
-        stColumnLayer.popupTemplate = popuTemplate;
-        break;
-
-      case 'StructuralFoundation':
-        stFoundationLayer = layer;
-        stFoundationLayer.popupTemplate = popuTemplate;
-        break;
-
-      default:
-        layer.visible = true;
-    }
-  });
+  },
+  // outFields: ['Status', 'Name', 'Type', 'BaseCategory'],
+  popupEnabled: false,
 });
+
+export const buildingFilter: any = new BuildingFilter({
+  filterBlocks: undefined,
+});
+
+// https://developers.arcgis.com/javascript/latest/sample-code/layers-scenelayer-filter-query/

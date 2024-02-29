@@ -17,5 +17,5 @@
     "jsx": "react-jsx",
     "experimentalDecorators": true
   },
-  "include": ["src"]
+  "include": ["src", "../sc_bim/src/components/Render.tsx"]
 }

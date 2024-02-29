@@ -1,14 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { view } from '../Scene';
-import {
-  stColumnLayer,
-  stFoundationLayer,
-  stFramingLayer,
-  columnsLayer,
-  floorsLayer,
-  wallsLayer,
-  buildingSpotLayer,
-} from '../layers';
+import { buildingFilter, buildingLayer, buildingSpotLayer } from '../layers';
 
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
@@ -16,10 +8,9 @@ import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Responsive from '@amcharts/amcharts5/themes/Responsive';
 import '../App.css';
 import {
-  buildingLayerCategory,
+  buildingType,
   generateChartData,
   generateTotalProgress,
-  layerVisibleTrue,
   thousands_separators,
   zoomToLayer,
 } from '../Query';
@@ -39,19 +30,22 @@ const Chart = (props: any) => {
   const chartRef = useRef<unknown | any | undefined>({});
   const [chartData, setChartData] = useState([]);
   const [progress, setProgress] = useState([]);
+  const [buildingName, setBuildingName] = useState<any>();
 
   const chartID = 'station-bar';
   useEffect(() => {
-    generateChartData(props.station).then((response: any) => {
+    generateChartData(props.building).then((response: any) => {
       setChartData(response);
     });
 
-    generateTotalProgress(props.station).then((response: any) => {
+    generateTotalProgress(props.building).then((response: any) => {
       setProgress(response);
     });
 
+    setBuildingName(props.building);
+
     zoomToLayer(buildingSpotLayer);
-  }, [props.station]);
+  }, [props.building]);
 
   // Define parameters
   const marginTop = 0;
@@ -242,61 +236,40 @@ const Chart = (props: any) => {
       });
 
       // Click event
-      // const find = dropdownData.find((emp: any) => emp.name === props.station);
-      // const stationValue = find?.value;
-
       series.columns.template.events.on('click', (ev) => {
         const selected: any = ev.target.dataItem?.dataContext;
-        const categorySelect: string = selected.category;
-        // const selectedStatus: number | null =
-        //   fieldName === 'comp' ? (fieldName === 'incomp' ? 1 : 4) : fieldName === 'delay' ? 3 : 1;
+        const category_selected: string = selected.category;
+        const find = buildingType.find((emp: any) => emp.category == category_selected);
+        const type_selected = find?.value;
+        const status_selected: number | null =
+          fieldName === 'comp' ? (fieldName === 'incomp' ? 1 : 4) : fieldName === 'delay' ? 3 : 1;
 
-        if (categorySelect === buildingLayerCategory[0]) {
-          stFoundationLayer.visible = true;
-          stFramingLayer.visible = false;
-          stColumnLayer.visible = false;
-          columnsLayer.visible = false;
-          floorsLayer.visible = false;
-          wallsLayer.visible = false;
-        } else if (categorySelect === buildingLayerCategory[1]) {
-          stFoundationLayer.visible = false;
-          stFramingLayer.visible = true;
-          stColumnLayer.visible = false;
-          columnsLayer.visible = false;
-          floorsLayer.visible = false;
-          wallsLayer.visible = false;
-        } else if (categorySelect === buildingLayerCategory[2]) {
-          stFoundationLayer.visible = false;
-          stFramingLayer.visible = false;
-          stColumnLayer.visible = true;
-          columnsLayer.visible = false;
-          floorsLayer.visible = false;
-          wallsLayer.visible = false;
-        } else if (categorySelect === buildingLayerCategory[3]) {
-          stFoundationLayer.visible = false;
-          stFramingLayer.visible = false;
-          stColumnLayer.visible = false;
-          columnsLayer.visible = true;
-          floorsLayer.visible = false;
-          wallsLayer.visible = false;
-        } else if (categorySelect === buildingLayerCategory[4]) {
-          stFoundationLayer.visible = false;
-          stFramingLayer.visible = false;
-          stColumnLayer.visible = false;
-          columnsLayer.visible = false;
-          floorsLayer.visible = true;
-          wallsLayer.visible = false;
-        } else if (categorySelect === buildingLayerCategory[5]) {
-          stFoundationLayer.visible = false;
-          stFramingLayer.visible = false;
-          stColumnLayer.visible = false;
-          columnsLayer.visible = false;
-          floorsLayer.visible = false;
-          wallsLayer.visible = true;
-        }
+        buildingFilter.filterBlocks = [
+          {
+            filterExpression:
+              "Name = '" +
+              props.building +
+              "'" +
+              ' AND ' +
+              'type = ' +
+              type_selected +
+              ' AND ' +
+              'status = ' +
+              status_selected,
+          },
+        ];
+
+        buildingLayer.filters = [buildingFilter];
+        buildingLayer.activeFilterId = buildingFilter.id;
 
         view.on('click', () => {
-          layerVisibleTrue();
+          buildingFilter.filterBlocks = [
+            {
+              filterExpression: "Name = '" + props.building + "'",
+            },
+          ];
+          buildingLayer.filters = [buildingFilter];
+          buildingLayer.activeFilterId = buildingFilter.id;
         });
       });
       legend.data.push(series);
@@ -319,7 +292,7 @@ const Chart = (props: any) => {
           <br />
           <br />
           <b className="totalProgressNumber">
-            {progress[2]} %{' '}
+            {progress[1]} %{' '}
             <div className="totalProgressNumber2">({thousands_separators(progress[0])})</div>
           </b>
         </div>
@@ -335,7 +308,7 @@ const Chart = (props: any) => {
         id={chartID}
         style={{
           width: '22vw',
-          height: '65vh',
+          height: '60vh',
           backgroundColor: 'rgb(0,0,0,0)',
           color: 'white',
           marginRight: '10px',
