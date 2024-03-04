@@ -1,17 +1,22 @@
-import { view } from './Scene';
-import { buildingFilter, buildingLayer, dateTable, depotChart } from './layers';
+import {
+  buildingLayer,
+  floorsLayer,
+  stColumnLayer,
+  stFoundationLayer,
+  stFramingLayer,
+  furnitureLayer,
+  doorsLayer,
+  stairsLayer,
+  roofsLayer,
+  windowsLayer,
+  wallsLayer,
+  columnsLayer,
+  dateTable,
+  buildingSpotLayer,
+} from './layers';
 import StatisticDefinition from '@arcgis/core/rest/support/StatisticDefinition';
-
-// bulding filter
-export async function buildingFilterExpression(buildingname: any) {
-  buildingFilter.filterBlocks = [
-    {
-      filterExpression: "Name = '" + buildingname + "'",
-    },
-  ];
-  buildingLayer.filters = [buildingFilter];
-  buildingLayer.activeFilterId = buildingFilter.id;
-}
+import Query from '@arcgis/core/rest/support/Query';
+import { view } from './Scene';
 
 // Updat date
 export async function dateUpdate() {
@@ -77,305 +82,430 @@ export const buildingType = [
     value: 7,
   },
   {
-    category: 'Others',
+    category: 'Others', //furniture + doors + stairs + windows
     value: 8,
   },
 ];
 
+export const layerVisibleTrue = () => {
+  stColumnLayer.visible = true;
+  stFoundationLayer.visible = true;
+  stFramingLayer.visible = true;
+  furnitureLayer.visible = true;
+  doorsLayer.visible = true;
+  stairsLayer.visible = true;
+  roofsLayer.visible = true;
+  floorsLayer.visible = true;
+  wallsLayer.visible = true;
+  windowsLayer.visible = true;
+  buildingLayer.visible = true;
+};
+
+const layerVisibleFalse = () => {
+  stColumnLayer.visible = false;
+  stFoundationLayer.visible = false;
+  stFramingLayer.visible = false;
+  furnitureLayer.visible = false;
+  doorsLayer.visible = false;
+  stairsLayer.visible = false;
+  roofsLayer.visible = false;
+  floorsLayer.visible = false;
+  wallsLayer.visible = false;
+  windowsLayer.visible = false;
+  buildingLayer.visible = false;
+};
+
+export async function buildingSpotZoom(buildingname: any) {
+  var query = buildingSpotLayer.createQuery();
+  const queryExpression = "Name = '" + buildingname + "'";
+  const queryAll = '1=1';
+  if (!buildingname) {
+    query.where = queryAll;
+  } else {
+    query.where = queryExpression;
+  }
+
+  buildingSpotLayer.queryExtent(query).then((response: any) => {
+    view
+      .goTo(response.extent, {
+        //response.extent
+        speedFactor: 2,
+      })
+      .catch(function (error) {
+        if (error.name !== 'AbortError') {
+          console.error(error);
+        }
+      });
+  });
+}
+
 export async function generateChartData(buildingname: any) {
-  var total_incomp_stfoundation = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 1 and type = 1) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_incomp_stfoundation',
+  var total_incomp = new StatisticDefinition({
+    onStatisticField: 'CASE WHEN Status = 1 THEN 1 ELSE 0 END',
+    outStatisticFieldName: 'total_incomp',
     statisticType: 'sum',
   });
 
-  var total_comp_stfoundation = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 4 and type = 1) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_comp_stfoundation',
+  var total_comp = new StatisticDefinition({
+    onStatisticField: 'CASE WHEN Status = 4 THEN 1 ELSE 0 END',
+    outStatisticFieldName: 'total_comp',
     statisticType: 'sum',
   });
 
-  var total_delay_stfoundation = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 3 and type = 1) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_delay_stfoundation',
+  var total_delay = new StatisticDefinition({
+    onStatisticField: 'CASE WHEN Status = 3 THEN 1 ELSE 0 END',
+    outStatisticFieldName: 'total_delay',
     statisticType: 'sum',
   });
 
-  var total_incomp_stcolumn = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 1 and type = 2) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_incomp_stcolumn',
-    statisticType: 'sum',
-  });
-
-  var total_comp_stcolumn = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 4 and type = 2) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_comp_stcolumn',
-    statisticType: 'sum',
-  });
-
-  var total_delay_stcolumn = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 3 and type = 2) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_delay_stcolumn',
-    statisticType: 'sum',
-  });
-
-  var total_incomp_stframing = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 1 and type = 3) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_incomp_stframing',
-    statisticType: 'sum',
-  });
-
-  var total_comp_stframing = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 4 and type = 3) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_comp_stframing',
-    statisticType: 'sum',
-  });
-
-  var total_delay_stframing = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 3 and type = 3) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_delay_stframing',
-    statisticType: 'sum',
-  });
-
-  var total_incomp_roofs = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 1 and type = 4) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_incomp_roofs',
-    statisticType: 'sum',
-  });
-
-  var total_comp_roofs = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 4 and type = 4) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_comp_roofs',
-    statisticType: 'sum',
-  });
-
-  var total_delay_roofs = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 3 and type = 4) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_delay_roofs',
-    statisticType: 'sum',
-  });
-
-  var total_incomp_floors = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 1 and type = 5) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_incomp_floors',
-    statisticType: 'sum',
-  });
-
-  var total_comp_floors = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 4 and type = 5) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_comp_floors',
-    statisticType: 'sum',
-  });
-
-  var total_delay_floors = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 3 and type = 5) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_delay_floors',
-    statisticType: 'sum',
-  });
-
-  var total_incomp_walls = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 1 and type = 6) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_incomp_walls',
-    statisticType: 'sum',
-  });
-
-  var total_comp_walls = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 4 and type = 6) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_comp_walls',
-    statisticType: 'sum',
-  });
-
-  var total_delay_walls = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 3 and type = 6) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_delay_walls',
-    statisticType: 'sum',
-  });
-
-  var total_incomp_columns = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 1 and type = 7) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_incomp_columns',
-    statisticType: 'sum',
-  });
-
-  var total_comp_columns = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 4 and type = 7) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_comp_columns',
-    statisticType: 'sum',
-  });
-
-  var total_delay_columns = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 3 and type = 7) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_delay_columns',
-    statisticType: 'sum',
-  });
-
-  var total_incomp_others = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 1 and type = 8) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_incomp_others',
-    statisticType: 'sum',
-  });
-
-  var total_comp_others = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 4 and type = 8) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_comp_others',
-    statisticType: 'sum',
-  });
-
-  var total_delay_others = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN (status = 3 and type = 8) THEN 1 ELSE 0 END',
-    outStatisticFieldName: 'total_delay_others',
-    statisticType: 'sum',
-  });
-
-  var query = depotChart.createQuery();
-  query.outStatistics = [
-    total_incomp_stfoundation,
-    total_comp_stfoundation,
-    total_delay_stfoundation,
-    total_incomp_stcolumn,
-    total_comp_stcolumn,
-    total_delay_stcolumn,
-    total_incomp_stframing,
-    total_comp_stframing,
-    total_delay_stframing,
-    total_incomp_roofs,
-    total_comp_roofs,
-    total_delay_roofs,
-    total_incomp_floors,
-    total_comp_floors,
-    total_delay_floors,
-    total_incomp_walls,
-    total_comp_walls,
-    total_delay_walls,
-    total_incomp_columns,
-    total_comp_columns,
-    total_delay_columns,
-    total_incomp_others,
-    total_comp_others,
-    total_delay_others,
-  ];
+  var query = new Query();
+  query.outStatistics = [total_incomp, total_comp, total_delay];
 
   const queryExpression = "Name = '" + buildingname + "'";
   const queryAll = '1=1';
 
   if (!buildingname) {
-    depotChart.definitionExpression = queryAll;
+    stColumnLayer.definitionExpression = queryAll;
+    stFoundationLayer.definitionExpression = queryAll;
+    stFramingLayer.definitionExpression = queryAll;
+    furnitureLayer.definitionExpression = queryAll;
+    doorsLayer.definitionExpression = queryAll;
+    stairsLayer.definitionExpression = queryAll;
+    roofsLayer.definitionExpression = queryAll;
+    columnsLayer.definitionExpression = queryAll;
+    floorsLayer.definitionExpression = queryAll;
+    wallsLayer.definitionExpression = queryAll;
+    windowsLayer.definitionExpression = queryAll;
     query.where = queryAll;
+    layerVisibleFalse();
   } else {
-    depotChart.definitionExpression = queryExpression;
+    stColumnLayer.definitionExpression = queryExpression;
+    stFoundationLayer.definitionExpression = queryExpression;
+    stFramingLayer.definitionExpression = queryExpression;
+    furnitureLayer.definitionExpression = queryExpression;
+    doorsLayer.definitionExpression = queryExpression;
+    stairsLayer.definitionExpression = queryExpression;
+    roofsLayer.definitionExpression = queryExpression;
+    columnsLayer.definitionExpression = queryExpression;
+    floorsLayer.definitionExpression = queryExpression;
+    wallsLayer.definitionExpression = queryExpression;
+    windowsLayer.definitionExpression = queryExpression;
     query.where = queryExpression;
+    layerVisibleTrue();
   }
 
-  return depotChart.queryFeatures(query).then((response: any) => {
+  const stColumnCompile = stColumnLayer.queryFeatures(query).then((response: any) => {
     var stats = response.features[0].attributes;
-    const stfoundation_incomp = stats.total_incomp_stfoundation;
-    const stfoundation_comp = stats.total_comp_stfoundation;
-    const stfoundation_delay = stats.total_delay_stfoundation;
-    const stcolumn_incomp = stats.total_incomp_stcolumn;
-    const stcolumn_comp = stats.total_comp_stcolumn;
-    const stcolumn_delay = stats.total_delay_stcolumn;
-    const stframing_incomp = stats.total_incomp_stframing;
-    const stframing_comp = stats.total_comp_stframing;
-    const stframing_delay = stats.total_delay_stframing;
-    const roofs_incomp = stats.total_incomp_roofs;
-    const roofs_comp = stats.total_comp_roofs;
-    const roofs_delay = stats.total_delay_roofs;
-    const floors_incomp = stats.total_incomp_floors;
-    const floors_comp = stats.total_comp_floors;
-    const floors_delay = stats.total_delay_floors;
-    const walls_incomp = stats.total_incomp_walls;
-    const walls_comp = stats.total_comp_walls;
-    const walls_delay = stats.total_delay_walls;
-    const columns_incomp = stats.total_incomp_columns;
-    const columns_comp = stats.total_comp_columns;
-    const columns_delay = stats.total_delay_columns;
-    const others_incomp = stats.total_incomp_others;
-    const others_comp = stats.total_comp_others;
-    const others_delay = stats.total_delay_others;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
 
-    const data = [
-      {
-        category: buildingType[0].category,
-        comp: stfoundation_comp,
-        incomp: stfoundation_incomp,
-        delay: stfoundation_delay,
-      },
-      {
-        category: buildingType[1].category,
-        comp: stcolumn_comp,
-        incomp: stcolumn_incomp,
-        delay: stcolumn_delay,
-      },
-      {
-        category: buildingType[2].category,
-        comp: stframing_comp,
-        incomp: stframing_incomp,
-        delay: stframing_delay,
-      },
-      {
-        category: buildingType[3].category,
-        comp: roofs_comp,
-        incomp: roofs_incomp,
-        delay: roofs_delay,
-      },
-      {
-        category: buildingType[4].category,
-        comp: floors_comp,
-        incomp: floors_incomp,
-        delay: floors_delay,
-      },
-      {
-        category: buildingType[5].category,
-        comp: walls_comp,
-        incomp: walls_incomp,
-        delay: walls_delay,
-      },
-      {
-        category: buildingType[6].category,
-        comp: columns_comp,
-        incomp: columns_incomp,
-        delay: columns_delay,
-      },
-      {
-        category: buildingType[7].category,
-        comp: others_comp,
-        incomp: others_incomp,
-        delay: others_delay,
-      },
-    ];
-
-    return data;
+    return [total_incomp, total_comp, total_delay];
   });
+
+  const stFoundationCompile = stFoundationLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
+
+    return [total_incomp, total_comp, total_delay];
+  });
+
+  const stFramingCompile = stFramingLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
+
+    return [total_incomp, total_comp, total_delay];
+  });
+
+  const columnsCompile = columnsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
+
+    return [total_incomp, total_comp, total_delay];
+  });
+
+  const furnitureCompile = furnitureLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
+
+    return [total_incomp, total_comp, total_delay];
+  });
+
+  const doorsCompile = doorsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
+
+    return [total_incomp, total_comp, total_delay];
+  });
+
+  const floorsCompile = floorsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
+
+    return [total_incomp, total_comp, total_delay];
+  });
+
+  const stairsCompile = stairsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
+
+    return [total_incomp, total_comp, total_delay];
+  });
+
+  const roofsCompile = roofsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
+
+    return [total_incomp, total_comp, total_delay];
+  });
+
+  const wallsCompile = wallsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
+
+    return [total_incomp, total_comp, total_delay];
+  });
+
+  const windowsCompile = windowsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    const total_delay = stats.total_delay;
+
+    return [total_incomp, total_comp, total_delay];
+  });
+
+  const stcolumn = await stColumnCompile;
+  const stfoundation = await stFoundationCompile;
+  const stframing = await stFramingCompile;
+  const columns = await columnsCompile;
+  const furniture = await furnitureCompile;
+  const doors = await doorsCompile;
+  const floors = await floorsCompile;
+  const stairs = await stairsCompile;
+  const roofs = await roofsCompile;
+  const walls = await wallsCompile;
+  const windows = await windowsCompile;
+
+  const data = [
+    {
+      category: buildingType[0].category,
+      comp: stfoundation[1],
+      incomp: stfoundation[0],
+      delay: stfoundation[2],
+    },
+    {
+      category: buildingType[1].category,
+      comp: stcolumn[1],
+      incomp: stcolumn[0],
+      delay: stcolumn[2],
+    },
+    {
+      category: buildingType[2].category,
+      comp: stframing[1],
+      incomp: stframing[0],
+      delay: stframing[2],
+    },
+    {
+      category: buildingType[3].category,
+      comp: roofs[1],
+      incomp: roofs[0],
+      delay: roofs[2],
+    },
+    {
+      category: buildingType[4].category,
+      comp: floors[1],
+      incomp: floors[0],
+      delay: floors[2],
+    },
+    {
+      category: buildingType[5].category,
+      comp: walls[1],
+      incomp: walls[0],
+      delay: walls[2],
+    },
+    {
+      category: buildingType[6].category,
+      comp: columns[1],
+      incomp: columns[0],
+      delay: columns[2],
+    },
+    {
+      category: buildingType[7].category,
+      comp: furniture[1] + doors[1] + stairs[1] + windows[1],
+      incomp: furniture[0] + doors[0] + stairs[0] + windows[0],
+      delay: furniture[2] + doors[2] + stairs[2] + windows[2],
+    },
+  ];
+
+  return data;
 }
 
 export async function generateTotalProgress(buildingname: any) {
   var total_number = new StatisticDefinition({
-    onStatisticField: 'status',
+    onStatisticField: 'Status',
     outStatisticFieldName: 'total_number',
     statisticType: 'count',
   });
 
   var total_comp = new StatisticDefinition({
-    onStatisticField: 'CASE WHEN status = 4 THEN 1 ELSE 0 END',
+    onStatisticField: 'CASE WHEN Status = 4 THEN 1 ELSE 0 END',
     outStatisticFieldName: 'total_comp',
     statisticType: 'sum',
   });
 
-  var query = depotChart.createQuery();
+  var query = new Query();
   query.outStatistics = [total_number, total_comp];
 
   const queryExpression = "Name = '" + buildingname + "'";
   const queryAll = '1=1';
 
   !buildingname ? (query.where = queryAll) : (query.where = queryExpression);
-  return depotChart.queryFeatures(query).then((response: any) => {
+  const stColumnCompile = stColumnLayer.queryFeatures(query).then((response: any) => {
     var stats = response.features[0].attributes;
     const total_number = stats.total_number;
     const total_comp = stats.total_comp;
 
-    const total_progress = ((total_comp / total_number) * 100).toFixed(1);
-    return [total_number, total_progress];
+    return [total_number, total_comp];
   });
+
+  const stFoundationCompile = stFoundationLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_number = stats.total_number;
+    const total_comp = stats.total_comp;
+
+    return [total_number, total_comp];
+  });
+
+  const stFramingCompile = stFramingLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_number = stats.total_number;
+    const total_comp = stats.total_comp;
+
+    return [total_number, total_comp];
+  });
+
+  const columnsCompile = columnsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_number = stats.total_number;
+    const total_comp = stats.total_comp;
+
+    return [total_number, total_comp];
+  });
+
+  const furnitureCompile = furnitureLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_number = stats.total_number;
+    const total_comp = stats.total_comp;
+
+    return [total_number, total_comp];
+  });
+
+  const doorsCompile = doorsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_number = stats.total_number;
+    const total_comp = stats.total_comp;
+
+    return [total_number, total_comp];
+  });
+
+  const floorsCompile = floorsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_number = stats.total_number;
+    const total_comp = stats.total_comp;
+
+    return [total_number, total_comp];
+  });
+
+  const stairsCompile = stairsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_number = stats.total_number;
+    const total_comp = stats.total_comp;
+
+    return [total_number, total_comp];
+  });
+
+  const roofsCompile = roofsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_number = stats.total_number;
+    const total_comp = stats.total_comp;
+
+    return [total_number, total_comp];
+  });
+
+  const wallsCompile = wallsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_number = stats.total_number;
+    const total_comp = stats.total_comp;
+
+    return [total_number, total_comp];
+  });
+
+  const windowsCompile = windowsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_number = stats.total_number;
+    const total_comp = stats.total_comp;
+
+    return [total_number, total_comp];
+  });
+
+  const stcolumn = await stColumnCompile;
+  const stfoundation = await stFoundationCompile;
+  const stframing = await stFramingCompile;
+  const columns = await columnsCompile;
+  const furniture = await furnitureCompile;
+  const doors = await doorsCompile;
+  const floors = await floorsCompile;
+  const stairs = await stairsCompile;
+  const roofs = await roofsCompile;
+  const walls = await wallsCompile;
+  const windows = await windowsCompile;
+
+  const total =
+    stcolumn[0] +
+    stfoundation[0] +
+    stframing[0] +
+    columns[0] +
+    furniture[0] +
+    doors[0] +
+    floors[0] +
+    stairs[0] +
+    roofs[0] +
+    walls[0] +
+    windows[0];
+
+  const comp =
+    stcolumn[1] +
+    stfoundation[1] +
+    stframing[1] +
+    columns[1] +
+    furniture[1] +
+    doors[1] +
+    floors[1] +
+    stairs[1] +
+    roofs[1] +
+    walls[1] +
+    windows[1];
+  const progress = ((comp / total) * 100).toFixed(1);
+  return [total, comp, progress];
 }
 
 // Thousand separators function

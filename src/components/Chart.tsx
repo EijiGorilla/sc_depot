@@ -1,6 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import { view } from '../Scene';
-import { buildingFilter, buildingLayer, buildingSpotLayer } from '../layers';
+import {
+  stColumnLayer,
+  stFoundationLayer,
+  stFramingLayer,
+  columnsLayer,
+  floorsLayer,
+  wallsLayer,
+  buildingSpotLayer,
+  furnitureLayer,
+  doorsLayer,
+  stairsLayer,
+  windowsLayer,
+  roofsLayer,
+} from '../layers';
 
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
@@ -8,12 +21,12 @@ import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Responsive from '@amcharts/amcharts5/themes/Responsive';
 import '../App.css';
 import {
-  buildingFilterExpression,
+  buildingSpotZoom,
   buildingType,
   generateChartData,
   generateTotalProgress,
+  layerVisibleTrue,
   thousands_separators,
-  zoomToLayer,
 } from '../Query';
 
 // Dispose function
@@ -42,9 +55,9 @@ const Chart = (props: any) => {
       setProgress(response);
     });
 
-    buildingFilterExpression(props.building);
+    buildingSpotZoom(props.building);
 
-    zoomToLayer(buildingSpotLayer);
+    layerVisibleTrue();
   }, [props.building]);
 
   // Define parameters
@@ -236,37 +249,117 @@ const Chart = (props: any) => {
       });
 
       // Click event
+      // const find = dropdownData.find((emp: any) => emp.name === props.building);
+      // const stationValue = find?.value;
+
       series.columns.template.events.on('click', (ev) => {
         const selected: any = ev.target.dataItem?.dataContext;
-        const category_selected: string = selected.category;
-        const find = buildingType.find((emp: any) => emp.category == category_selected);
-        const type_selected = find?.value;
-        const status_selected: number | null =
-          fieldName === 'comp' ? (fieldName === 'incomp' ? 1 : 4) : fieldName === 'delay' ? 3 : 1;
+        const categorySelect: string = selected.category;
+        // const selectedStatus: number | null =
+        //   fieldName === 'comp' ? (fieldName === 'incomp' ? 1 : 4) : fieldName === 'delay' ? 3 : 1;
 
-        // buildingFilter.filterBlocks = [
-        //   {
-        //     filterExpression:
-        //       "Name = '" +
-        //       props.building +
-        //       "'" +
-        //       ' AND ' +
-        //       'type = ' +
-        //       type_selected +
-        //       ' AND ' +
-        //       'status = ' +
-        //       status_selected,
-        //   },
-        // ];
+        if (categorySelect === buildingType[0].category) {
+          stFoundationLayer.visible = true;
+          stFramingLayer.visible = false;
+          stColumnLayer.visible = false;
+          columnsLayer.visible = false;
+          roofsLayer.visible = false;
+          floorsLayer.visible = false;
+          wallsLayer.visible = false;
+          furnitureLayer.visible = false;
+          doorsLayer.visible = false;
+          stairsLayer.visible = false;
+          windowsLayer.visible = false;
+        } else if (categorySelect === buildingType[1].category) {
+          stFoundationLayer.visible = false;
+          stFramingLayer.visible = false;
+          stColumnLayer.visible = true;
+          columnsLayer.visible = false;
+          roofsLayer.visible = false;
+          floorsLayer.visible = false;
+          wallsLayer.visible = false;
+          furnitureLayer.visible = false;
+          doorsLayer.visible = false;
+          stairsLayer.visible = false;
+          windowsLayer.visible = false;
+        } else if (categorySelect === buildingType[2].category) {
+          stFoundationLayer.visible = false;
+          stFramingLayer.visible = true;
+          stColumnLayer.visible = false;
+          columnsLayer.visible = false;
+          roofsLayer.visible = false;
+          floorsLayer.visible = false;
+          wallsLayer.visible = false;
+          furnitureLayer.visible = false;
+          doorsLayer.visible = false;
+          stairsLayer.visible = false;
+          windowsLayer.visible = false;
+        } else if (categorySelect === buildingType[3].category) {
+          stFoundationLayer.visible = false;
+          stFramingLayer.visible = false;
+          stColumnLayer.visible = false;
+          columnsLayer.visible = false;
+          roofsLayer.visible = true;
+          floorsLayer.visible = false;
+          wallsLayer.visible = false;
+          furnitureLayer.visible = false;
+          doorsLayer.visible = false;
+          stairsLayer.visible = false;
+          windowsLayer.visible = false;
+        } else if (categorySelect === buildingType[4].category) {
+          stFoundationLayer.visible = false;
+          stFramingLayer.visible = false;
+          stColumnLayer.visible = false;
+          columnsLayer.visible = false;
+          roofsLayer.visible = false;
+          floorsLayer.visible = true;
+          wallsLayer.visible = false;
+          furnitureLayer.visible = false;
+          doorsLayer.visible = false;
+          stairsLayer.visible = false;
+          windowsLayer.visible = false;
+        } else if (categorySelect === buildingType[5].category) {
+          stFoundationLayer.visible = false;
+          stFramingLayer.visible = false;
+          stColumnLayer.visible = false;
+          columnsLayer.visible = false;
+          roofsLayer.visible = false;
+          floorsLayer.visible = false;
+          wallsLayer.visible = true;
+          furnitureLayer.visible = false;
+          doorsLayer.visible = false;
+          stairsLayer.visible = false;
+          windowsLayer.visible = false;
+        } else if (categorySelect === buildingType[6].category) {
+          stFoundationLayer.visible = false;
+          stFramingLayer.visible = false;
+          stColumnLayer.visible = false;
+          columnsLayer.visible = true;
+          roofsLayer.visible = false;
+          floorsLayer.visible = false;
+          wallsLayer.visible = false;
+          furnitureLayer.visible = false;
+          doorsLayer.visible = false;
+          stairsLayer.visible = false;
+          windowsLayer.visible = false;
+        } else if (categorySelect === buildingType[7].category) {
+          stFoundationLayer.visible = false;
+          stFramingLayer.visible = false;
+          stColumnLayer.visible = false;
+          columnsLayer.visible = false;
+          roofsLayer.visible = false;
+          floorsLayer.visible = false;
+          wallsLayer.visible = false;
+          furnitureLayer.visible = true;
+          doorsLayer.visible = true;
+          stairsLayer.visible = true;
+          windowsLayer.visible = true;
+        }
 
-        // buildingLayer.filters = [buildingFilter];
-        // buildingLayer.activeFilterId = buildingFilter.id;
-        // view.on('click', () => {
-        //   console.log(props.building);
-        //   buildingFilterExpression(props.building);
-        // });
+        view.on('click', () => {
+          layerVisibleTrue();
+        });
       });
-
       legend.data.push(series);
     }
     makeSeries('Complete', 'comp');
@@ -287,7 +380,7 @@ const Chart = (props: any) => {
           <br />
           <br />
           <b className="totalProgressNumber">
-            {progress[1]} %{' '}
+            {progress[2]} %{' '}
             <div className="totalProgressNumber2">({thousands_separators(progress[0])})</div>
           </b>
         </div>
@@ -303,7 +396,7 @@ const Chart = (props: any) => {
         id={chartID}
         style={{
           width: '22vw',
-          height: '60vh',
+          height: '65vh',
           backgroundColor: 'rgb(0,0,0,0)',
           color: 'white',
           marginRight: '10px',

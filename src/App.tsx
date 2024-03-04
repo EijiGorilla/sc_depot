@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-comment-textnodes */
 import { useRef, useEffect, useState } from 'react';
-import { view, basemaps, layerList, timeSlider, start } from './Scene';
+import { map, view, basemaps, layerList, timeSlider, start } from './Scene';
 import Select from 'react-select';
 import './index.css';
 import './App.css';
@@ -24,9 +24,17 @@ import {
 } from '@esri/calcite-components-react';
 import Chart from './components/Chart';
 import { DropDownData } from './customClass';
-import { buildingSpotLayer, depotChart } from './layers';
-import { webscene } from './layers';
-import { buildingFilterExpression, dateUpdate } from './Query';
+import {
+  floorsLayer,
+  stColumnLayer,
+  stFoundationLayer,
+  stFramingLayer,
+  wallsLayer,
+  columnsLayer,
+  buildingSpotLayer,
+} from './layers';
+// import TimeSlider from './components/TimeSlider';
+import { dateUpdate } from './Query';
 
 function App() {
   const [asOfDate, setAsOfDate] = useState<undefined | any | unknown>(null);
@@ -54,6 +62,19 @@ function App() {
       actionActiveWidget.hidden = true;
     }
 
+    if (activeWidget === 'timeslider') {
+      timeSlider.timeExtent.end = start;
+      view.ui.remove(timeSlider);
+      const queryExpression = 'Station = ' + buildingName.value;
+
+      stColumnLayer.definitionExpression = queryExpression;
+      stFoundationLayer.definitionExpression = queryExpression;
+      stFramingLayer.definitionExpression = queryExpression;
+      columnsLayer.definitionExpression = queryExpression;
+      floorsLayer.definitionExpression = queryExpression;
+      wallsLayer.definitionExpression = queryExpression;
+    }
+
     if (nextWidget !== activeWidget) {
       const actionNextWidget = document.querySelector(
         `[data-panel-id=${nextWidget}]`,
@@ -78,7 +99,7 @@ function App() {
   };
 
   useEffect(() => {
-    webscene.ground.opacity = underground === true ? 0.7 : 1;
+    map.ground.opacity = underground === true ? 0.7 : 1;
     view.environment.atmosphereEnabled = false;
   }, [underground]);
 
@@ -99,7 +120,7 @@ function App() {
     });
 
     if (mapDiv.current) {
-      webscene.ground.navigationConstraint = {
+      map.ground.navigationConstraint = {
         type: 'none',
       };
 
@@ -137,13 +158,12 @@ function App() {
     <>
       <CalciteShell>
         <CalciteTabs slot="panel-end" style={{ width: '25vw' }}>
-          <Chart building={!buildingName ? '' : buildingName.field1} />
           {/* Make sure that the component 'Chart' is executed after sub-layers are loaded.  */}
-          {/* {!depotChart ? (
+          {!stColumnLayer ? (
             <div></div>
           ) : (
             <Chart building={!buildingName ? '' : buildingName.field1} />
-          )} */}
+          )}
         </CalciteTabs>
         <header
           slot="header"
