@@ -7,7 +7,6 @@ import {
   columnsLayer,
   floorsLayer,
   wallsLayer,
-  buildingSpotLayer,
   furnitureLayer,
   doorsLayer,
   stairsLayer,
@@ -28,6 +27,7 @@ import {
   layerVisibleTrue,
   thousands_separators,
 } from '../Query';
+import { CalciteLabel } from '@esri/calcite-components-react';
 
 // Dispose function
 function maybeDisposeRoot(divId: any) {
@@ -374,24 +374,21 @@ const Chart = (props: any) => {
 
   return (
     <div>
-      <div className="totalProgressDiv">
-        <div>
-          <div className="totalProgressLabel">TOTAL PROGRESS</div>
-          <br />
-          <br />
-          <b className="totalProgressNumber">
-            {progress[2]} %{' '}
-            <div className="totalProgressNumber2">({thousands_separators(progress[0])})</div>
-          </b>
-        </div>
-        <img
-          src="https://EijiGorilla.github.io/Symbols/Station_Structures_icon.png"
-          alt="Utility Logo"
-          height={'17%'}
-          width={'17%'}
-          style={{ padding: '10px', margin: 'auto' }}
-        />
-      </div>
+      <CalciteLabel>TOTAL PROGRESS</CalciteLabel>
+      <CalciteLabel layout="inline">
+        <b className="totalProgressNumber">
+          {progress[2]} %
+          <img
+            src="https://EijiGorilla.github.io/Symbols/Station_Structures_icon.png"
+            alt="Utility Logo"
+            height={'23%'}
+            width={'23%'}
+            style={{ marginLeft: '110%', display: 'flex', marginTop: '-17%' }}
+          />
+          <div className="totalProgressNumber2">({thousands_separators(progress[0])})</div>
+        </b>
+      </CalciteLabel>
+
       <div
         id={chartID}
         style={{

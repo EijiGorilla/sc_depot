@@ -168,7 +168,13 @@ function App() {
         <header
           slot="header"
           id="header-title"
-          style={{ display: 'flex', width: '100%', padding: '0 1rem' }}
+          style={{
+            display: 'flex',
+            width: '100%',
+            padding: '0 1rem',
+            borderStyle: 'solid',
+            borderWidth: 1,
+          }}
         >
           <img
             src="https://EijiGorilla.github.io/Symbols/Projec_Logo/DOTr_Logo_v2.png"

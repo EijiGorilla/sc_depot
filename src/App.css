@@ -16,11 +16,22 @@ br {
   font-size: 24%;
 }
 
+calcite-label {
+  --calcite-ui-text-1: #ffffff;
+  --calcite-font-size--1: 1.1rem;
+  /* margin-top: 1vh; */
+  margin-left: 15px;
+  margin-top: 15px;
+}
+
 calcite-tab,
 calcite-tabs {
   --calcite-ui-border-3: #555555;
   --calcite-ui-border-2: #555555;
   --calcite-ui-border-1: #555555;
+  border-style: solid;
+  border-width: 0.7;
+  border-top: rgb(0, 0, 0, 0);
 }
 
 calcite-action-bar {
@@ -137,34 +148,20 @@ calcite-list {
 
 /* total Progress */
 
-.totalProgressDiv {
-  display: flex;
-  padding-left: 20px;
-  margin-top: 15px;
-  margin-bottom: 20px;
-}
-
-.totalProgressLabel {
-  color: white;
-  font-size: 1.5vw;
-  padding-bottom: 0.3vh;
-  padding-top: 0.6vh;
-}
-
 .totalProgressNumber {
   color: #6ede00;
-  font-size: 3.3vw;
+  font-size: 3rem;
   font-weight: bold;
   font-family: 'calibri';
-  margin-left: 10px;
+  margin-left: 4%;
 }
 
 .totalProgressNumber2 {
   color: white;
-  font-size: 1vw;
+  font-size: 2vh;
   font-weight: normal;
-  padding-top: 0.5vh;
-  margin-left: 10px;
+  margin-left: 4%;
+  margin-top: 8%;
 }
 
 #utilityNumberDiv {

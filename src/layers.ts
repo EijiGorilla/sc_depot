@@ -1,12 +1,7 @@
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
 import LabelClass from '@arcgis/core/layers/support/LabelClass';
 import SimpleRenderer from '@arcgis/core/renderers/SimpleRenderer';
-import {
-  SimpleMarkerSymbol,
-  LabelSymbol3D,
-  TextSymbol3DLayer,
-  SimpleLineSymbol,
-} from '@arcgis/core/symbols';
+import { SimpleLineSymbol } from '@arcgis/core/symbols';
 import { labelSymbol3DLine } from './Label';
 import BuildingSceneLayer from '@arcgis/core/layers/BuildingSceneLayer';
 
