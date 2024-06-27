@@ -1,4 +1,5 @@
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
+import SceneLayer from '@arcgis/core/layers/SceneLayer';
 import LabelClass from '@arcgis/core/layers/support/LabelClass';
 import SimpleRenderer from '@arcgis/core/renderers/SimpleRenderer';
 import { SimpleLineSymbol } from '@arcgis/core/symbols';
@@ -69,6 +70,20 @@ export const stationLayer = new FeatureLayer({
   },
 });
 stationLayer.listMode = 'hide';
+
+/* Civil works layer */
+export const civil_works_layer = new SceneLayer({
+  portalItem: {
+    id: 'ceb76cc366a24527b85e0b49f6492db9',
+    portal: {
+      url: 'https://gis.railway-sector.com/portal',
+    },
+  },
+  title: 'Civil Works',
+  elevationInfo: {
+    mode: 'relative-to-ground',
+  },
+});
 
 /* Building Scene Layer for station structures */
 const buildingSpotLabel = labelSymbol3DLine({

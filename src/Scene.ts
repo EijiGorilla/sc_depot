@@ -5,7 +5,13 @@ import LayerList from '@arcgis/core/widgets/LayerList';
 import Expand from '@arcgis/core/widgets/Expand';
 import Compass from '@arcgis/core/widgets/Compass';
 import BuildingExplorer from '@arcgis/core/widgets/BuildingExplorer';
-import { buildingLayer, buildingSpotLayer, prowLayer, stationLayer } from './layers';
+import {
+  buildingLayer,
+  buildingSpotLayer,
+  civil_works_layer,
+  prowLayer,
+  stationLayer,
+} from './layers';
 import TimeSlider from '@arcgis/core/widgets/TimeSlider';
 
 export const map = new Map({
@@ -16,6 +22,7 @@ export const map = new Map({
 map.add(buildingSpotLayer);
 map.add(prowLayer);
 map.add(buildingLayer);
+map.add(civil_works_layer);
 map.add(stationLayer);
 
 export const view = new SceneView({
@@ -67,7 +74,7 @@ export const layerList = new LayerList({
       };
     }
 
-    // item.title === 'Depot Buildings' ? (item.visible = false) : (item.visible = true);
+    item.title === 'Civil Works' ? (item.visible = false) : (item.visible = true);
   },
 });
 
