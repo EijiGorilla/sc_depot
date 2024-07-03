@@ -177,7 +177,7 @@ export async function generateChartData(buildingname: any) {
     wallsLayer.definitionExpression = queryAll;
     windowsLayer.definitionExpression = queryAll;
     query.where = queryAll;
-    layerVisibleFalse();
+    // layerVisibleFalse();
   } else {
     stColumnLayer.definitionExpression = queryExpression;
     stFoundationLayer.definitionExpression = queryExpression;
@@ -191,7 +191,7 @@ export async function generateChartData(buildingname: any) {
     wallsLayer.definitionExpression = queryExpression;
     windowsLayer.definitionExpression = queryExpression;
     query.where = queryExpression;
-    layerVisibleTrue();
+    // layerVisibleTrue();
   }
 
   const stColumnCompile = stColumnLayer.queryFeatures(query).then((response: any) => {

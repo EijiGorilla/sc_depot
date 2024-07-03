@@ -12,6 +12,7 @@ import {
   stairsLayer,
   windowsLayer,
   roofsLayer,
+  genericModelLayer,
 } from '../layers';
 
 import * as am5 from '@amcharts/amcharts5';
@@ -57,7 +58,7 @@ const Chart = (props: any) => {
 
     buildingSpotZoom(props.building);
 
-    layerVisibleTrue();
+    // layerVisibleTrue();
   }, [props.building]);
 
   // Define parameters
@@ -87,6 +88,7 @@ const Chart = (props: any) => {
   const chartBorderLineWidth = 0.4;
 
   useEffect(() => {
+    genericModelLayer.visible = false;
     maybeDisposeRoot(chartID);
 
     var root = am5.Root.new(chartID);

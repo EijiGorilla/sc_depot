@@ -148,8 +148,8 @@ export let stFramingLayer: null | any;
 export let stColumnLayer: null | any;
 export let stFoundationLayer: null | any;
 
-let genericModelLayer: null | any;
-let excludedLayers: any = [];
+export let genericModelLayer: null | any;
+export let exteriorShellLayer: null | any;
 let ArchitecturalLayers: null | any;
 
 export const popuTemplate = {
@@ -200,7 +200,6 @@ buildingLayer.when(() => {
 
       case 'GenericModel':
         genericModelLayer = layer;
-        excludedLayers.push(layer);
         break;
 
       case 'Furniture':

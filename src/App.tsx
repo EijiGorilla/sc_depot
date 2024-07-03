@@ -32,6 +32,7 @@ import {
   wallsLayer,
   columnsLayer,
   buildingSpotLayer,
+  buildingLayer,
 } from './layers';
 // import TimeSlider from './components/TimeSlider';
 import { dateUpdate } from './Query';
@@ -53,6 +54,9 @@ function App() {
   // For dropdown filter
   const [buildingName, setBuildingName] = useState<null | any>(null);
   const [initBuildingNames, setInitBuildingNames] = useState([]);
+
+  // load building layer
+  const [buildingLayerLoaded, setBuildingLayerLoaded] = useState<any>();
 
   useEffect(() => {
     if (activeWidget) {
@@ -102,6 +106,12 @@ function App() {
     map.ground.opacity = underground === true ? 0.7 : 1;
     view.environment.atmosphereEnabled = false;
   }, [underground]);
+
+  useEffect(() => {
+    buildingLayer.load().then(() => {
+      setBuildingLayerLoaded(buildingLayer.loadStatus);
+    });
+  });
 
   useEffect(() => {
     // Dropdown
