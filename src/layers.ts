@@ -149,7 +149,6 @@ export let stColumnLayer: null | any;
 export let stFoundationLayer: null | any;
 
 export let genericModelLayer: null | any;
-export let exteriorShellLayer: null | any;
 let ArchitecturalLayers: null | any;
 
 export const popuTemplate = {
@@ -187,8 +186,11 @@ export const popuTemplate = {
   ],
 };
 
+export let exteriorShellLayer: null | any;
+
 buildingLayer.when(() => {
   buildingLayer.allSublayers.forEach((layer: any) => {
+    console.log(layer.modelName);
     switch (layer.modelName) {
       case 'FullModel':
         layer.visible = true;
@@ -196,6 +198,10 @@ buildingLayer.when(() => {
 
       case 'Architectural':
         layer.visible = true;
+        break;
+
+      case 'Overview':
+        exteriorShellLayer = layer;
         break;
 
       case 'GenericModel':

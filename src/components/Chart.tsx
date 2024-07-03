@@ -13,6 +13,7 @@ import {
   windowsLayer,
   roofsLayer,
   genericModelLayer,
+  exteriorShellLayer,
 } from '../layers';
 
 import * as am5 from '@amcharts/amcharts5';
@@ -89,6 +90,8 @@ const Chart = (props: any) => {
 
   useEffect(() => {
     genericModelLayer.visible = false;
+    exteriorShellLayer.visible = false;
+
     maybeDisposeRoot(chartID);
 
     var root = am5.Root.new(chartID);
