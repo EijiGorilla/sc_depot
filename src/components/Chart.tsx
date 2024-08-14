@@ -397,7 +397,7 @@ const Chart = (props: any) => {
       <div
         id={chartID}
         style={{
-          width: '22vw',
+          // width: '22vw',
           height: '65vh',
           backgroundColor: 'rgb(0,0,0,0)',
           color: 'white',

@@ -8,6 +8,10 @@ import '@esri/calcite-components/dist/components/calcite-shell';
 import '@esri/calcite-components/dist/components/calcite-list';
 import '@esri/calcite-components/dist/components/calcite-list-item';
 import '@esri/calcite-components/dist/components/calcite-shell-panel';
+import '@esri/calcite-components/dist/components/calcite-tabs';
+import '@esri/calcite-components/dist/components/calcite-tab';
+import '@esri/calcite-components/dist/components/calcite-tab-nav';
+import '@esri/calcite-components/dist/components/calcite-tab-title';
 import '@esri/calcite-components/dist/components/calcite-action';
 import '@esri/calcite-components/dist/components/calcite-action-bar';
 import '@esri/calcite-components/dist/calcite/calcite.css';
@@ -18,9 +22,12 @@ import {
   CalciteAction,
   CalciteSwitch,
   CalciteTabs,
+  CalciteTabNav,
+  CalciteTabTitle,
   CalcitePanel,
   CalciteList,
   CalciteListItem,
+  CalciteTab,
 } from '@esri/calcite-components-react';
 import Chart from './components/Chart';
 import { DropDownData } from './customClass';
@@ -167,13 +174,22 @@ function App() {
   return (
     <>
       <CalciteShell>
-        <CalciteTabs slot="panel-end" style={{ width: '25vw' }}>
-          {/* Make sure that the component 'Chart' is executed after sub-layers are loaded.  */}
-          {!stColumnLayer ? (
-            <div></div>
-          ) : (
-            <Chart building={!buildingName ? '' : buildingName.field1} />
-          )}
+        <CalciteTabs slot="panel-end" layout="center" style={{ width: '33vw' }}>
+          <CalciteTabNav slot="title-group" id="thetabs">
+            <CalciteTabTitle class="depotbuilding">Depot Buildings</CalciteTabTitle>
+            <CalciteTabTitle class="civilworks">Civil Works</CalciteTabTitle>
+          </CalciteTabNav>
+          <CalciteTab>
+            {/* Make sure that the component 'Chart' is executed after sub-layers are loaded.  */}
+            {!stColumnLayer ? (
+              <div></div>
+            ) : (
+              <Chart building={!buildingName ? '' : buildingName.field1} />
+            )}
+          </CalciteTab>
+          <CalciteTab>
+            <div style={{ color: 'red', padding: '20px' }}>Pending...</div>
+          </CalciteTab>
         </CalciteTabs>
         <header
           slot="header"
@@ -348,7 +364,7 @@ function App() {
             position: 'fixed',
             zIndex: 1,
             bottom: 10,
-            right: '23%',
+            marginLeft: 'auto',
             color: 'white',
             backgroundColor: '#2b2b2b',
             paddingLeft: 5,
