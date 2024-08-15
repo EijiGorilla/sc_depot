@@ -7,8 +7,8 @@ import Compass from '@arcgis/core/widgets/Compass';
 import BuildingExplorer from '@arcgis/core/widgets/BuildingExplorer';
 import {
   buildingLayer,
+  buildingLayer_cw,
   buildingSpotLayer,
-  civil_works_layer,
   prowLayer,
   stationLayer,
 } from './layers';
@@ -21,8 +21,8 @@ export const map = new Map({
 
 map.add(buildingSpotLayer);
 map.add(prowLayer);
+map.add(buildingLayer_cw);
 map.add(buildingLayer);
-map.add(civil_works_layer);
 map.add(stationLayer);
 
 export const view = new SceneView({
@@ -74,7 +74,7 @@ export const layerList = new LayerList({
       };
     }
 
-    item.title === 'Civil Works' ? (item.visible = false) : (item.visible = true);
+    // item.title === 'Civil Works' ? (item.visible = false) : (item.visible = true);
   },
 });
 

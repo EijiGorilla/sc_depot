@@ -1,19 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { view } from '../Scene';
 import {
-  stColumnLayer,
-  stFoundationLayer,
-  stFramingLayer,
-  columnsLayer,
-  floorsLayer,
-  wallsLayer,
-  furnitureLayer,
-  doorsLayer,
-  stairsLayer,
-  windowsLayer,
-  roofsLayer,
-  genericModelLayer,
-  exteriorShellLayer,
+  floorsLayer_cw,
+  plumbinFixturesLayer_cw,
+  stairsRailingLayer_cw,
+  stFoundationLayer_cw,
+  wallsLayer_cw,
 } from '../layers';
 
 import * as am5 from '@amcharts/amcharts5';
@@ -22,11 +14,9 @@ import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5themes_Responsive from '@amcharts/amcharts5/themes/Responsive';
 import '../App.css';
 import {
-  buildingSpotZoom,
   buildingType,
-  generateChartData,
-  generateTotalProgress,
-  layerVisibleTrue,
+  generateChartData_cw,
+  layerVisibleTrue_cw,
   thousands_separators,
 } from '../Query';
 import { CalciteLabel } from '@esri/calcite-components-react';
@@ -41,26 +31,19 @@ function maybeDisposeRoot(divId: any) {
 }
 
 // Draw chart
-const Chart = (props: any) => {
+const ChartCw = (props: any) => {
   const legendRef = useRef<unknown | any | undefined>({});
   const chartRef = useRef<unknown | any | undefined>({});
   const [chartData, setChartData] = useState([]);
   const [progress, setProgress] = useState([]);
 
-  const chartID = 'station-bar';
+  const chartID_cw = 'depot-civil-works';
   useEffect(() => {
-    generateChartData(props.building).then((response: any) => {
-      setChartData(response);
+    generateChartData_cw().then((response: any) => {
+      setChartData(response[0]);
+      setProgress(response[1]);
     });
-
-    generateTotalProgress(props.building).then((response: any) => {
-      setProgress(response);
-    });
-
-    buildingSpotZoom(props.building);
-
-    // layerVisibleTrue();
-  }, [props.building]);
+  }, []);
 
   // Define parameters
   const marginTop = 0;
@@ -89,12 +72,9 @@ const Chart = (props: any) => {
   const chartBorderLineWidth = 0.4;
 
   useEffect(() => {
-    genericModelLayer.visible = false;
-    exteriorShellLayer.visible = false;
+    maybeDisposeRoot(chartID_cw);
 
-    maybeDisposeRoot(chartID);
-
-    var root = am5.Root.new(chartID);
+    var root = am5.Root.new(chartID_cw);
     root.container.children.clear();
     root._logo?.dispose();
 
@@ -253,49 +233,40 @@ const Chart = (props: any) => {
         });
       });
 
+      // Click event
+      // const find = dropdownData.find((emp: any) => emp.name === props.building);
+      // const stationValue = find?.value;
+
       series.columns.template.events.on('click', (ev) => {
         const selected: any = ev.target.dataItem?.dataContext;
         const categorySelect: string = selected.category;
         const find = buildingType.find((emp: any) => emp.category === categorySelect);
         const typeSelect = find?.value;
-        const status_selected: number | null =
-          fieldName === 'comp' ? (fieldName === 'incomp' ? 1 : 4) : fieldName === 'delay' ? 3 : 1;
-        const expression = 'Type = ' + typeSelect + ' AND ' + 'Status = ' + status_selected;
+        const status_selected: number | null = fieldName === 'comp' ? 4 : 1;
+        const expression = 'Types = ' + typeSelect + ' AND ' + 'Status = ' + status_selected;
 
         if (!categorySelect) {
-          stFoundationLayer.visible = true;
-          stFramingLayer.visible = true;
-          stColumnLayer.visible = true;
-          columnsLayer.visible = true;
-          roofsLayer.visible = true;
-          floorsLayer.visible = true;
-          wallsLayer.visible = true;
-          furnitureLayer.visible = true;
-          doorsLayer.visible = true;
-          stairsLayer.visible = true;
-          windowsLayer.visible = true;
+          stFoundationLayer_cw.visible = true;
+          floorsLayer_cw.visible = true;
+          wallsLayer_cw.visible = true;
+          stairsRailingLayer_cw.visible = true;
+          plumbinFixturesLayer_cw.visible = true;
         } else {
-          stColumnLayer.definitionExpression = expression;
-          stFoundationLayer.definitionExpression = expression;
-          stFramingLayer.definitionExpression = expression;
-          furnitureLayer.definitionExpression = expression;
-          doorsLayer.definitionExpression = expression;
-          stairsLayer.definitionExpression = expression;
-          roofsLayer.definitionExpression = expression;
-          floorsLayer.definitionExpression = expression;
-          wallsLayer.definitionExpression = expression;
-          windowsLayer.definitionExpression = expression;
+          stFoundationLayer_cw.definitionExpression = expression;
+          floorsLayer_cw.definitionExpression = expression;
+          wallsLayer_cw.definitionExpression = expression;
+          stairsRailingLayer_cw.definitionExpression = expression;
+          plumbinFixturesLayer_cw.definitionExpression = expression;
         }
 
         view.on('click', () => {
-          layerVisibleTrue();
+          layerVisibleTrue_cw();
         });
       });
       legend.data.push(series);
     }
     makeSeries('Complete', 'comp');
     makeSeries('Incomplete', 'incomp');
-    makeSeries('Delayed', 'delay');
     chart.appear(1000, 100);
 
     return () => {
@@ -321,7 +292,7 @@ const Chart = (props: any) => {
       </CalciteLabel>
 
       <div
-        id={chartID}
+        id={chartID_cw}
         style={{
           // width: '22vw',
           height: '65vh',
@@ -334,4 +305,4 @@ const Chart = (props: any) => {
   );
 };
 
-export default Chart;
+export default ChartCw;

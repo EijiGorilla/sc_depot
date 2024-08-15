@@ -13,6 +13,12 @@ import {
   columnsLayer,
   dateTable,
   buildingSpotLayer,
+  buildingLayer_cw,
+  floorsLayer_cw,
+  wallsLayer_cw,
+  stairsRailingLayer_cw,
+  stFoundationLayer_cw,
+  plumbinFixturesLayer_cw,
 } from './layers';
 import StatisticDefinition from '@arcgis/core/rest/support/StatisticDefinition';
 import Query from '@arcgis/core/rest/support/Query';
@@ -82,12 +88,22 @@ export const buildingType = [
     value: 7,
   },
   {
-    category: 'Others', //furniture + doors + stairs + windows
+    category: 'Others', //furniture + doors + stairs or stairsRailing + windows
     value: 8,
   },
 ];
 
 export const layerVisibleTrue = () => {
+  stColumnLayer.definitionExpression = '1=1';
+  stFoundationLayer.definitionExpression = '1=1';
+  stFramingLayer.definitionExpression = '1=1';
+  furnitureLayer.definitionExpression = '1=1';
+  doorsLayer.definitionExpression = '1=1';
+  stairsLayer.definitionExpression = '1=1';
+  roofsLayer.definitionExpression = '1=1';
+  floorsLayer.definitionExpression = '1=1';
+  wallsLayer.definitionExpression = '1=1';
+  windowsLayer.definitionExpression = '1=1';
   stColumnLayer.visible = true;
   stFoundationLayer.visible = true;
   stFramingLayer.visible = true;
@@ -115,6 +131,20 @@ const layerVisibleFalse = () => {
   buildingLayer.visible = false;
 };
 
+export const layerVisibleTrue_cw = () => {
+  stFoundationLayer_cw.definitionExpression = '1=1';
+  floorsLayer_cw.definitionExpression = '1=1';
+  wallsLayer_cw.definitionExpression = '1=1';
+  stairsRailingLayer_cw.definitionExpression = '1=1';
+  plumbinFixturesLayer_cw.definitionExpression = '1=1';
+  stFoundationLayer_cw.visible = true;
+  stairsRailingLayer_cw.visible = true;
+  floorsLayer_cw.visible = true;
+  wallsLayer_cw.visible = true;
+  plumbinFixturesLayer_cw.visible = true;
+  buildingLayer_cw.visible = true;
+};
+
 export async function buildingSpotZoom(buildingname: any) {
   var query = buildingSpotLayer.createQuery();
   const queryExpression = "Name = '" + buildingname + "'";
@@ -137,6 +167,106 @@ export async function buildingSpotZoom(buildingname: any) {
         }
       });
   });
+}
+
+export async function generateChartData_cw() {
+  var total_incomp = new StatisticDefinition({
+    onStatisticField: 'CASE WHEN Status = 1 THEN 1 ELSE 0 END',
+    outStatisticFieldName: 'total_incomp',
+    statisticType: 'sum',
+  });
+
+  var total_comp = new StatisticDefinition({
+    onStatisticField: 'CASE WHEN Status = 4 THEN 1 ELSE 0 END',
+    outStatisticFieldName: 'total_comp',
+    statisticType: 'sum',
+  });
+
+  var query = new Query();
+  query.outStatistics = [total_incomp, total_comp];
+
+  const stFoundationCompile = stFoundationLayer_cw.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    return [total_incomp, total_comp];
+  });
+
+  const floorsCompile = floorsLayer_cw.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    return [total_incomp, total_comp];
+  });
+
+  const plumbingFixturesCompile = plumbinFixturesLayer_cw
+    .queryFeatures(query)
+    .then((response: any) => {
+      var stats = response.features[0].attributes;
+      const total_incomp = stats.total_incomp;
+      const total_comp = stats.total_comp;
+      return [total_incomp, total_comp];
+    });
+
+  const stairsRailingsCompile = stairsRailingLayer_cw.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    return [total_incomp, total_comp];
+  });
+
+  const wallsCompile = wallsLayer.queryFeatures(query).then((response: any) => {
+    var stats = response.features[0].attributes;
+    const total_incomp = stats.total_incomp;
+    const total_comp = stats.total_comp;
+    return [total_incomp, total_comp];
+  });
+
+  const stfoundation = await stFoundationCompile;
+  const floors = await floorsCompile;
+  const plumbingFixtures = await plumbingFixturesCompile;
+  const stairsRailing = await stairsRailingsCompile;
+  const walls = await wallsCompile;
+
+  const data_cw = [
+    {
+      category: buildingType[0].category,
+      comp: stfoundation[1],
+      incomp: stfoundation[0],
+    },
+    {
+      category: buildingType[4].category,
+      comp: floors[1],
+      incomp: floors[0],
+    },
+    {
+      category: buildingType[5].category,
+      comp: walls[1],
+      incomp: walls[0],
+    },
+    {
+      category: buildingType[7].category,
+      comp: stairsRailing[1] + plumbingFixtures[1],
+      incomp: stairsRailing[0] + plumbingFixtures[0],
+    },
+  ];
+
+  const total =
+    stfoundation[0] +
+    stfoundation[1] +
+    floors[0] +
+    floors[1] +
+    stairsRailing[0] +
+    stairsRailing[1] +
+    walls[0] +
+    walls[1] +
+    plumbingFixtures[0] +
+    plumbingFixtures[1];
+
+  const comp = stfoundation[1] + floors[1] + stairsRailing[1] + walls[1] + plumbingFixtures[1];
+  const progress = ((comp / total) * 100).toFixed(1);
+
+  return [data_cw, progress];
 }
 
 export async function generateChartData(buildingname: any) {
@@ -177,7 +307,6 @@ export async function generateChartData(buildingname: any) {
     wallsLayer.definitionExpression = queryAll;
     windowsLayer.definitionExpression = queryAll;
     query.where = queryAll;
-    // layerVisibleFalse();
   } else {
     stColumnLayer.definitionExpression = queryExpression;
     stFoundationLayer.definitionExpression = queryExpression;
@@ -191,7 +320,6 @@ export async function generateChartData(buildingname: any) {
     wallsLayer.definitionExpression = queryExpression;
     windowsLayer.definitionExpression = queryExpression;
     query.where = queryExpression;
-    // layerVisibleTrue();
   }
 
   const stColumnCompile = stColumnLayer.queryFeatures(query).then((response: any) => {

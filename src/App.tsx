@@ -40,9 +40,12 @@ import {
   columnsLayer,
   buildingSpotLayer,
   buildingLayer,
+  stFoundationLayer_cw,
+  buildingLayer_cw,
 } from './layers';
 // import TimeSlider from './components/TimeSlider';
 import { dateUpdate } from './Query';
+import ChartCw from './components/ChartCw';
 
 function App() {
   const [asOfDate, setAsOfDate] = useState<undefined | any | unknown>(null);
@@ -64,6 +67,7 @@ function App() {
 
   // load building layer
   const [buildingLayerLoaded, setBuildingLayerLoaded] = useState<any>();
+  const [buildingLayerLoaded_cw, setBuildingLayerLoaded_cw] = useState<any>();
 
   useEffect(() => {
     if (activeWidget) {
@@ -118,6 +122,10 @@ function App() {
     buildingLayer.load().then(() => {
       setBuildingLayerLoaded(buildingLayer.loadStatus);
     });
+
+    // buildingLayer_cw.load().then(() => {
+    //   setBuildingLayerLoaded_cw(buildingLayer_cw.loadStatus);
+    // });
   });
 
   useEffect(() => {
@@ -177,7 +185,7 @@ function App() {
         <CalciteTabs slot="panel-end" layout="center" style={{ width: '33vw' }}>
           <CalciteTabNav slot="title-group" id="thetabs">
             <CalciteTabTitle class="depotbuilding">Depot Buildings</CalciteTabTitle>
-            <CalciteTabTitle class="civilworks">Civil Works</CalciteTabTitle>
+            <CalciteTabTitle class="civilworks">Civil Works (pending)</CalciteTabTitle>
           </CalciteTabNav>
           <CalciteTab>
             {/* Make sure that the component 'Chart' is executed after sub-layers are loaded.  */}
@@ -187,9 +195,7 @@ function App() {
               <Chart building={!buildingName ? '' : buildingName.field1} />
             )}
           </CalciteTab>
-          <CalciteTab>
-            <div style={{ color: 'red', padding: '20px' }}>Pending...</div>
-          </CalciteTab>
+          <CalciteTab>{stFoundationLayer_cw && <ChartCw />}</CalciteTab>
         </CalciteTabs>
         <header
           slot="header"

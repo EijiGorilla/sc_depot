@@ -2,9 +2,12 @@ import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
 import SceneLayer from '@arcgis/core/layers/SceneLayer';
 import LabelClass from '@arcgis/core/layers/support/LabelClass';
 import SimpleRenderer from '@arcgis/core/renderers/SimpleRenderer';
-import { SimpleLineSymbol } from '@arcgis/core/symbols';
+import { SimpleLineSymbol, MeshSymbol3D, FillSymbol3DLayer } from '@arcgis/core/symbols';
+import SolidEdges3D from '@arcgis/core/symbols/edges/SolidEdges3D';
 import { labelSymbol3DLine } from './Label';
 import BuildingSceneLayer from '@arcgis/core/layers/BuildingSceneLayer';
+import UniqueValueRenderer from '@arcgis/core/renderers/UniqueValueRenderer';
+import { Label } from '@amcharts/amcharts5';
 
 /* Standalone table for Dates */
 export const dateTable = new FeatureLayer({
@@ -71,20 +74,6 @@ export const stationLayer = new FeatureLayer({
 });
 stationLayer.listMode = 'hide';
 
-/* Civil works layer */
-export const civil_works_layer = new SceneLayer({
-  portalItem: {
-    id: 'ceb76cc366a24527b85e0b49f6492db9',
-    portal: {
-      url: 'https://gis.railway-sector.com/portal',
-    },
-  },
-  title: 'Civil Works',
-  elevationInfo: {
-    mode: 'relative-to-ground',
-  },
-});
-
 /* Building Scene Layer for station structures */
 const buildingSpotLabel = labelSymbol3DLine({
   materialColor: '#d4ff33',
@@ -122,6 +111,7 @@ export const buildingSpotLayer = new FeatureLayer({
 });
 buildingSpotLayer.listMode = 'hide';
 
+// Building layers for Depot buildings
 export const buildingLayer = new BuildingSceneLayer({
   portalItem: {
     id: '2fcb3db0ec324f92805cc45c0e79f29d',
@@ -261,6 +251,153 @@ buildingLayer.when(() => {
       case 'StructuralFoundation':
         stFoundationLayer = layer;
         stFoundationLayer.popupTemplate = popuTemplate;
+        break;
+
+      default:
+        layer.visible = true;
+    }
+  });
+});
+
+// Building layers for Depot civil works
+export const buildingLayer_cw = new BuildingSceneLayer({
+  portalItem: {
+    id: '02ae45b1cec743599866829abc1cab05',
+    portal: {
+      url: 'https://gis.railway-sector.com/portal',
+    },
+  },
+  // Do not add outFields; otherwise, rendering get extremely slow
+  title: 'Depot Civil Works',
+});
+
+const colorStatus = [
+  [225, 225, 225, 0.5], // To be Constructed (white), default = 0.1
+  [130, 130, 130, 0.5], // Under Construction
+  [255, 0, 0, 0.8], // Delayed
+  [0, 112, 255, 0.8], // Completed
+];
+
+const renderer = new UniqueValueRenderer({
+  field: 'Status',
+});
+
+for (var i = 0; i < colorStatus.length; i++) {
+  renderer.addUniqueValueInfo({
+    value: i + 1,
+    label:
+      i === 0
+        ? 'To be Constructed'
+        : i === 1
+          ? 'Under Construction'
+          : i === 2
+            ? 'Delayed'
+            : i === 3
+              ? 'Completed'
+              : '',
+    symbol: new MeshSymbol3D({
+      symbolLayers: [
+        new FillSymbol3DLayer({
+          material: {
+            color: colorStatus[i],
+            colorMixMode: 'replace',
+          },
+          edges: new SolidEdges3D({
+            color: [225, 225, 225, 0.8], // default = 0.3
+          }),
+        }),
+      ],
+    }),
+  });
+}
+
+// Discipline: Architectural
+export let floorsLayer_cw: null | any;
+export let wallsLayer_cw: null | any;
+export let stairsRailingLayer_cw: null | any;
+export let plumbinFixturesLayer_cw: null | any;
+
+// Discipline_cw: Structural
+export let stFoundationLayer_cw: null | any;
+export let genericModelLayer_cw: null | any;
+
+export const popupTemplate_cw = {
+  title: '{Types}',
+  content: [
+    {
+      type: 'fields',
+      fieldInfos: [
+        {
+          fieldName: 'BaseCategory',
+          label: 'BaseCategory',
+        },
+        {
+          fieldName: 'Status',
+          label: 'Construction Status',
+        },
+      ],
+    },
+  ],
+};
+
+export let exteriorShellLayer_cw: null | any;
+
+buildingLayer_cw.when(() => {
+  buildingLayer_cw.allSublayers.forEach((layer: any) => {
+    switch (layer.modelName) {
+      case 'FullModel':
+        layer.visible = true;
+        break;
+
+      case 'Architectural':
+        layer.visible = true;
+        break;
+
+      case 'Overview':
+        exteriorShellLayer_cw = layer;
+        exteriorShellLayer_cw.title = 'ExteriorShell';
+        exteriorShellLayer_cw.visible = false;
+        break;
+
+      case 'GenericModel':
+        genericModelLayer_cw = layer;
+        genericModelLayer_cw.title = 'GeneralModel';
+        break;
+
+      case 'Floors':
+        floorsLayer_cw = layer;
+        floorsLayer_cw.popupTemplate = popupTemplate_cw;
+        floorsLayer_cw.renderer = renderer;
+        floorsLayer_cw.title = 'Floors';
+        //excludedLayers
+        break;
+
+      case 'PlumbingFixtures':
+        plumbinFixturesLayer_cw = layer;
+        plumbinFixturesLayer_cw.popupTemplate = popupTemplate_cw;
+        plumbinFixturesLayer_cw.renderer = renderer;
+        plumbinFixturesLayer_cw.title = 'PlumbingFixtures';
+        break;
+
+      case 'StairsRailing':
+        stairsRailingLayer_cw = layer;
+        stairsRailingLayer_cw.popupTemplate = popupTemplate_cw;
+        stairsRailingLayer_cw.renderer = renderer;
+        stairsRailingLayer_cw.title = 'StairsRailing';
+        break;
+
+      case 'Walls':
+        wallsLayer_cw = layer;
+        wallsLayer_cw.popupTemplate = popupTemplate_cw;
+        wallsLayer_cw.renderer = renderer;
+        wallsLayer_cw.title = 'Walls';
+        break;
+
+      case 'StructuralFoundation':
+        stFoundationLayer_cw = layer;
+        stFoundationLayer_cw.popupTemplate = popupTemplate_cw;
+        stFoundationLayer_cw.renderer = renderer;
+        stFoundationLayer_cw.title = 'StructuralFoundation';
         break;
 
       default:
