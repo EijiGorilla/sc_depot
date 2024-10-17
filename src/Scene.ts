@@ -56,14 +56,15 @@ const buildingExplorer = new BuildingExplorer({
 const buildingExplorerExpand = new Expand({
   view,
   content: buildingExplorer,
-  expandIconClass: 'esri-icon-layers',
+  expandIcon: 'chevrons-right',
   expandTooltip: 'Building Explorer',
 });
 view.ui.add(buildingExplorerExpand, 'top-right');
 
 export const layerList = new LayerList({
   view: view,
-  selectionEnabled: true,
+  selectionMode: 'multiple',
+  visibilityAppearance: 'checkbox',
   container: undefined,
   listItemCreatedFunction: (event) => {
     const item = event.item;
