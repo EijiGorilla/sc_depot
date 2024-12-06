@@ -14,6 +14,7 @@ import '@esri/calcite-components/dist/components/calcite-tab-nav';
 import '@esri/calcite-components/dist/components/calcite-tab-title';
 import '@esri/calcite-components/dist/components/calcite-action';
 import '@esri/calcite-components/dist/components/calcite-action-bar';
+import '@esri/calcite-components/dist/components/calcite-switch';
 import '@esri/calcite-components/dist/calcite/calcite.css';
 import {
   CalciteShell,
@@ -182,7 +183,7 @@ function App() {
   return (
     <>
       <CalciteShell>
-        <CalciteTabs slot="panel-end" layout="center" style={{ width: '33vw' }}>
+        <CalciteTabs slot="panel-end" layout="center" scale="l">
           <CalciteTabNav slot="title-group" id="thetabs">
             <CalciteTabTitle class="depotbuilding">Depot Buildings</CalciteTabTitle>
             <CalciteTabTitle class="civilworks">Civil Works (pending)</CalciteTabTitle>
@@ -353,10 +354,10 @@ function App() {
         <div
           className="groundSwitchDiv"
           style={{
-            position: 'fixed',
-            zIndex: 1,
+            position: 'absolute',
+            zIndex: 10,
             bottom: 10,
-            marginLeft: 'auto',
+            right: 370,
             color: 'white',
             backgroundColor: '#2b2b2b',
             paddingLeft: 5,
