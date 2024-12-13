@@ -338,7 +338,7 @@ const Chart = (props: any) => {
           alt="Utility Logo"
           height={'55px'}
           width={'55px'}
-          style={{ marginLeft: '75%', display: 'flex', marginTop: '-40px' }}
+          style={{ marginLeft: '35%', display: 'flex', marginTop: '-40px' }}
         />
       </CalciteLabel>
       <div
@@ -347,7 +347,7 @@ const Chart = (props: any) => {
           fontSize: '1rem',
           fontFamily: 'calibri',
           lineHeight: '1.2',
-          marginLeft: '30px',
+          marginLeft: '45px',
         }}
       >
         ({thousands_separators(progress[0])})
