@@ -21,7 +21,7 @@ export const map = new Map({
 
 map.add(buildingSpotLayer);
 map.add(prowLayer);
-map.add(buildingLayer_cw);
+// map.add(buildingLayer_cw);
 map.add(buildingLayer);
 map.add(stationLayer);
 
